@@ -6,7 +6,7 @@ import rospy
 from std_msgs.msg import Bool
 
 # Config
-server = 'openwrt'
+server = 'jcl-router'
 username = 'jackal'
 password = 'jackal'
 
