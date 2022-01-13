@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Check root
+if [[ $EUID -eq 0 ]]; then
+   echo "This script must not be run as root" 
+   exit 1
+fi
+
+
+# Configuration
+if [[ -z "${ROBOT_SETUP}" ]]; then
+  echo "Path to robot setup file not set in variable 'ROBOT_SETUP'. Please set this environment variable and re-run the script."
+  exit 1
+fi
+
+source $ROBOT_SETUP
+groups="dialout"
+
+read -p "New Username (firstname + first letter of lastname): "  user_name
+
+# Add groups if not already existing
+sudo groupadd -f students
+sudo groupadd -f employees
+
+# Add new user
+sudo adduser "${user_name}"
+
+# Add new user to groups
+sudo usermod -aG ${groups} "${user_name}"
+
+read -r -p "Give new user sudo rights? [y/N]  " response
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        sudo usermod -aG sudo "${user_name}"
+        ;;
+    *)
+        ;;
+esac
+
+read -r -p "Is the new user an employee? [y/N]  " response
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        sudo usermod -aG employees "${user_name}"
+        ;;
+    *)
+        ;;
+esac
+
+read -r -p "Is the new user a student? [y/N]  " response
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        sudo usermod -aG students "${user_name}"
+        ;;
+    *)
+        ;;
+esac
+
+# Setup ROS workspace for new user
+echo "Setting up ROS workspace for ${user_name}..."
+
+sudo -i -u "${user_name}" bash << EOF
+source "$ROBOT_SETUP"
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws
+catkin init
+cd ~/catkin_ws/src
+git clone -b "$ROS_DISTRO"-devel -o tum-i6 https://github.com/tum-i6/jackal_robot.git
+cd jackal_robot
+git remote add origin https://github.com/jackal/jackal_robot.git
+git fetch --all
+cd ~/catkin_ws
+catkin build
+printf "\n\n\n# ROS Configuration\nsource ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+EOF
