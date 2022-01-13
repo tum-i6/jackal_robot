@@ -33,7 +33,7 @@ def talker():
 
             counter = 0
 
-        rospy.loginfo(wifi_status_msg)
+        # rospy.logdebug(f'Wifi router status message: {wifi_status_msg}')
         pub.publish(wifi_status)
 
         rate.sleep()
