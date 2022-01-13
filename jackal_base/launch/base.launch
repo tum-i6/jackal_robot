@@ -20,6 +20,9 @@
     <param name="wireless_interface" value="$(optenv JACKAL_WIRELESS_INTERFACE wlp2s0)" />
   </node>
 
+  <!-- Node for checking the wifi-client status of the connected router -->
+  <node pkg="jackal_base" type="wifi_status" name="wifi_status" />  
+
   <!-- TODO: Eliminate this by compiling the necessary message definitions into jackal_base. -->
   <node pkg="rosserial_python" type="message_info_service.py" name="rosserial_message_info" />
 

@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import paramiko
+
+import rospy
+from std_msgs.msg import Bool
+
+# Config
+server = 'openwrt'
+username = 'jackal'
+password = 'jackal'
+
+iface = 'wlan0'
+ssh_cmd = f'iwinfo {iface} assoclist'
+
+def talker():
+    pub = rospy.Publisher('/wifi_connected', Bool, queue_size=10)
+    rospy.init_node('wifi_status', anonymous=True)
+    rate = rospy.Rate(1) # 10hz
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(server, username=username, password=password)
+
+    counter = 0
+
+    while not rospy.is_shutdown():
+        if counter % 5 == 0:
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(ssh_cmd)
+
+            wifi_status_msg = ssh_stdout.readline()
+            wifi_status = wifi_status_msg != "" and 'No station connected' not in wifi_status_msg
+
+            counter = 0
+
+        rospy.loginfo(wifi_status_msg)
+        pub.publish(wifi_status)
+
+        rate.sleep()
+
+        counter += 1;
+
+if __name__ == '__main__':
+    try:
+        talker()
+    except rospy.ROSInterruptException:
+        pass
