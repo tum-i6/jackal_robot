@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import paramiko
+import os
 
 import rospy
 from std_msgs.msg import Bool
@@ -18,6 +19,17 @@ def talker():
     rospy.init_node('wifi_status', anonymous=True)
     rate = rospy.Rate(1) # 10hz
 
+    # Wait for connection to router
+    while not rospy.is_shutdown():
+        # Check if router is reachable
+        response = os.system("ping -c 1 " + server)
+
+        if response == 0:
+            break
+
+        rate.sleep()
+
+    # Connect to router via ssh
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(server, username=username, password=password)
@@ -26,6 +38,7 @@ def talker():
 
     while not rospy.is_shutdown():
         if counter % 5 == 0:
+            # Check if router is connected to wifi
             ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(ssh_cmd)
 
             wifi_status_msg = ssh_stdout.readline()
