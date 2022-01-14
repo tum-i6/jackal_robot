@@ -1,0 +1,29 @@
+<launch>
+  <arg name="camera_side" default="$(optenv JACKAL_CAM_SIDE left)" />
+  <arg if="$(eval camera_side == 'left')" name="x_offset" default="0" />
+  <arg if="$(eval camera_side == 'right')" name="x_offset" default="1280" />
+
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="2560" />
+    <param name="image_height" value="720" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node>
+
+  <!-- Video cropping-->
+  <node if="$(eval camera_side == 'left')" pkg="nodelet" type="nodelet" args="standalone image_proc/crop_decimate" name="crop_img">
+    <param name="x_offset" type="int" value="$(arg x_offset)" />
+    <param name="y_offset" type="int" value="0" />
+    <param name="width" type="int" value="1280" />
+    <param name="height" type="int" value="720" />
+    <!-- remap input topics -->
+    <remap from="camera/image_raw" to="/usb_cam/image_raw"/>
+    <remap from="camera/camera_info" to="/usb_cam/camera_info"/>
+    <!-- remap output topics -->
+    <remap from="camera_out/image_raw" to="/usb_cam/image_mono"/>
+    <remap from="camera_out/image_info" to="/usb_cam/camera_info_mono"/>
+  </node>
+
+</launch>
