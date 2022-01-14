@@ -3,7 +3,7 @@
 import os
 import robot_upstart
 
-j = robot_upstart.Job(interface="eno1", user="robot", workspace_setup=os.environ['ROBOT_SETUP'])
+j = robot_upstart.Job(user="robot", workspace_setup=os.environ['ROBOT_SETUP'])
 j.symlink = True
 j.add(package="jackal_base", filename="launch/base.launch")
 j.add(package="jackal_bringup", filename="launch/accessories.launch")
