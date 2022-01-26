@@ -10,6 +10,14 @@ in the URDF. See jackal_description/urdf/accessories.urdf.xacro.
     <include file="$(find jackal_bringup)/launch/zed_2i_mono.launch" />
   </group>
 
+  <group if="$(optenv JACKAL_RADAR 0)">
+    <arg name="radar_model" value="$(optenv JACKAL_RADAR_MODEL hrr)" />
+
+    <group if="$(eval arg('radar_model') == 'hrr')">
+      <include file="$(find radar_bringup)/launch/radar_hrr.launch" />
+    </group>
+  </group>
+
   <!--
     Primary and secondary 2D lasers.  Model defined by JACKAL_LASER_MODEL and JACKAL_LASER_SECONDARY_MODEL.
     Valid models:
