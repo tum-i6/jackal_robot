@@ -3,7 +3,7 @@
   <arg if="$(eval camera_side == 'left')" name="x_offset" default="0" />
   <arg if="$(eval camera_side == 'right')" name="x_offset" default="1280" />
 
-  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" respawn="true" respawn_delay="30">
     <param name="video_device" value="/dev/video0" />
     <param name="image_width" value="2560" />
     <param name="image_height" value="720" />
